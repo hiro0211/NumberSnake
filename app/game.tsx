@@ -15,8 +15,10 @@ import {
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
-const GRID_SIZE = 20;
-const CELL_SIZE = Math.min(width, height - 200) / GRID_SIZE;
+const GRID_SIZE = 16;
+const MARGIN = 30; // 画面端の余白
+const AVAILABLE_SIZE = Math.min(width - MARGIN * 2, height - 300); // ヘッダーとUIを除いた利用可能サイズ
+const CELL_SIZE = AVAILABLE_SIZE / GRID_SIZE;
 
 // ゲームの状態
 type GameState = "playing" | "paused" | "gameOver";
@@ -37,7 +39,7 @@ interface NumberItem {
 }
 
 export default function GameScreen() {
-  const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
+  const [snake, setSnake] = useState<Position[]>([{ x: 8, y: 8 }]);
   const [direction, setDirection] = useState<Direction>("RIGHT");
   const [numbers, setNumbers] = useState<NumberItem[]>([]);
   const [nextNumber, setNextNumber] = useState(1);
@@ -135,7 +137,7 @@ export default function GameScreen() {
   };
 
   const initializeGame = () => {
-    const initialSnake = [{ x: 10, y: 10 }];
+    const initialSnake = [{ x: 8, y: 8 }];
     setSnake(initialSnake);
     setDirection("RIGHT");
     directionRef.current = "RIGHT";
@@ -612,11 +614,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: MARGIN,
   },
   grid: {
     backgroundColor: "#16213e",
     borderRadius: 10,
-    padding: 5,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   row: {
     flexDirection: "row",
@@ -625,16 +633,18 @@ const styles = StyleSheet.create({
     width: CELL_SIZE,
     height: CELL_SIZE,
     backgroundColor: "#1a1a2e",
-    margin: 0.5,
+    margin: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 2,
+    borderRadius: 4,
+    borderWidth: 0.5,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   snakeHead: {
     backgroundColor: "#4ade80",
   },
   snakeHeadText: {
-    fontSize: CELL_SIZE * 0.6,
+    fontSize: CELL_SIZE * 0.5,
   },
   snakeBody: {
     backgroundColor: "#22c55e",
@@ -651,12 +661,12 @@ const styles = StyleSheet.create({
   },
   numberText: {
     color: "#e5e7eb",
-    fontSize: CELL_SIZE * 0.5,
+    fontSize: CELL_SIZE * 0.6,
     fontWeight: "bold",
   },
   nextNumberText: {
     color: "#1a1a2e",
-    fontSize: CELL_SIZE * 0.6,
+    fontSize: CELL_SIZE * 0.7,
     fontWeight: "bold",
   },
   pauseOverlay: {
