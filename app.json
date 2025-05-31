@@ -14,7 +14,10 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "submit": {
+        "ascAppId": "6746485493"
+      }
     },
     "android": {
       "adaptiveIcon": {
