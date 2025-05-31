@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "NumberSnake",
+    "name": "Number Snake",
     "slug": "NumberSnake",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,17 +10,20 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourdomain.numbersnake",
+      "bundleIdentifier": "com.numbersnake.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.numbersnake.app",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",

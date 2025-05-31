@@ -34,7 +34,7 @@ export default function HomeScreen() {
         setHighScore(parseInt(score));
       }
     } catch (error) {
-      console.error("ハイスコアの読み込みに失敗しました:", error);
+      console.error("Failed to load high score:", error);
     }
   };
 
@@ -44,12 +44,12 @@ export default function HomeScreen() {
 
   const showInstructions = () => {
     Alert.alert(
-      "ゲームの遊び方",
-      "🐍 蛇を操作して数字を昇順（1→2→3...）に食べよう！\n\n" +
-        "📱 画面をスワイプまたはタップして移動\n" +
-        "🎯 次に食べるべき数字は金色でハイライト\n" +
-        "⚡ 5個食べるごとにスピードアップ\n" +
-        "❌ 間違った順序で食べるとゲームオーバー",
+      "How to Play",
+      "🐍 Control the snake to eat numbers in ascending order (1→2→3...)!\n\n" +
+        "📱 Swipe or tap on the screen to move\n" +
+        "🎯 The next number to eat is highlighted in gold\n" +
+        "⚡ Speed ​​increases every 5 numbers eaten\n" +
+        "❌ Game over if you eat numbers in the wrong order",
       [{ text: "OK", style: "default" }]
     );
   };
@@ -58,34 +58,34 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
 
-      {/* タイトル */}
+      {/* Title */}
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Number</Text>
-        <Text style={styles.titleSnake}>Snake</Text>
-        <Text style={styles.subtitle}>🐍 数字を順番に食べよう！</Text>
+        <Text style={styles.title}>Snake</Text>
+        <Text style={styles.titleSnake}>Numbers</Text>
+        <Text style={styles.subtitle}>🐍 Eat the numbers in order!</Text>
       </View>
 
-      {/* ハイスコア */}
+      {/* High Score */}
       <View style={styles.scoreContainer}>
-        <Text style={styles.scoreLabel}>ハイスコア</Text>
+        <Text style={styles.scoreLabel}>High Score</Text>
         <Text style={styles.scoreValue}>{highScore}</Text>
       </View>
 
-      {/* ボタン */}
+      {/* Buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.playButton} onPress={startGame}>
-          <Text style={styles.playButtonText}>プレイ</Text>
+          <Text style={styles.playButtonText}>Play</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.instructionButton}
           onPress={showInstructions}
         >
-          <Text style={styles.instructionButtonText}>遊び方</Text>
+          <Text style={styles.instructionButtonText}>How to Play</Text>
         </TouchableOpacity>
       </View>
 
-      {/* デコレーション */}
+      {/* Decoration */}
       <View style={styles.decoration}>
         <Text style={styles.decorationText}>1 2 3 4 5 6 7 8 9</Text>
       </View>

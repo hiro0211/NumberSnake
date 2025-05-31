@@ -49,18 +49,18 @@ export default function RankingScreen() {
         );
       }
     } catch (error) {
-      console.error("スコアデータ読み込みエラー:", error);
+      console.error("Error loading score data:", error);
     }
   };
 
   const clearAllData = () => {
     Alert.alert(
-      "データ削除",
-      "すべてのスコアデータを削除しますか？この操作は取り消せません。",
+      "Delete Data",
+      "Are you sure you want to delete all score data? This action cannot be undone.",
       [
-        { text: "キャンセル", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "削除",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
@@ -68,10 +68,10 @@ export default function RankingScreen() {
               await AsyncStorage.removeItem("numberSnakeScoreHistory");
               setHighScore(0);
               setScoreHistory([]);
-              Alert.alert("完了", "すべてのデータが削除されました。");
+              Alert.alert("Success", "All data has been deleted.");
             } catch (error) {
-              console.error("データ削除エラー:", error);
-              Alert.alert("エラー", "データの削除に失敗しました。");
+              console.error("Error deleting data:", error);
+              Alert.alert("Error", "Failed to delete data.");
             }
           },
         },
@@ -96,7 +96,7 @@ export default function RankingScreen() {
       case 2:
         return "🥉";
       default:
-        return `${index + 1}位`;
+        return `#${index + 1}`;
     }
   };
 
@@ -104,27 +104,27 @@ export default function RankingScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
 
-      {/* ヘッダー */}
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>🏆 ランキング</Text>
+        <Text style={styles.title}>🏆 Rankings</Text>
       </View>
 
-      {/* ハイスコア表示 */}
+      {/* High Score Display */}
       <View style={styles.highScoreContainer}>
-        <Text style={styles.highScoreLabel}>最高スコア</Text>
+        <Text style={styles.highScoreLabel}>High Score</Text>
         <Text style={styles.highScoreValue}>{highScore}</Text>
         <Text style={styles.highScoreSubtext}>
-          {highScore > 0 ? "素晴らしい記録です！" : "まだ記録がありません"}
+          {highScore > 0 ? "Great record!" : "No records yet"}
         </Text>
       </View>
 
-      {/* スコア履歴 */}
+      {/* Score History */}
       <View style={styles.historyContainer}>
         <View style={styles.historyHeader}>
-          <Text style={styles.historyTitle}>スコア履歴</Text>
+          <Text style={styles.historyTitle}>Score History</Text>
           {scoreHistory.length > 0 && (
             <TouchableOpacity onPress={clearAllData} style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>クリア</Text>
+              <Text style={styles.clearButtonText}>Clear</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -136,9 +136,9 @@ export default function RankingScreen() {
           {scoreHistory.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>🎮</Text>
-              <Text style={styles.emptyStateTitle}>まだ記録がありません</Text>
+              <Text style={styles.emptyStateTitle}>No records yet</Text>
               <Text style={styles.emptyStateSubtext}>
-                ゲームをプレイしてスコアを記録しましょう！
+                Play the game to record your scores!
               </Text>
             </View>
           ) : (
@@ -162,14 +162,14 @@ export default function RankingScreen() {
         </ScrollView>
       </View>
 
-      {/* 統計情報 */}
+      {/* Statistics */}
       {scoreHistory.length > 0 && (
         <View style={styles.statsContainer}>
-          <Text style={styles.statsTitle}>統計</Text>
+          <Text style={styles.statsTitle}>Statistics</Text>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{scoreHistory.length}</Text>
-              <Text style={styles.statLabel}>プレイ回数</Text>
+              <Text style={styles.statLabel}>Plays</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
@@ -178,7 +178,7 @@ export default function RankingScreen() {
                     scoreHistory.length
                 )}
               </Text>
-              <Text style={styles.statLabel}>平均スコア</Text>
+              <Text style={styles.statLabel}>Avg Score</Text>
             </View>
           </View>
         </View>

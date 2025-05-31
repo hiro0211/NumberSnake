@@ -7,11 +7,13 @@ import {
   Dimensions,
   PanResponder,
   StatusBar,
+  StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
   Vibration,
   View,
+  ViewStyle,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -38,6 +40,19 @@ interface NumberItem {
   value: number;
 }
 
+const snakeHeadStyle: ViewStyle = { backgroundColor: "#4ade80" };
+const snakeBodyStyle: ViewStyle = { backgroundColor: "#22c55e" };
+const numberStyle: ViewStyle = {
+  backgroundColor: "#374151",
+  borderWidth: 1,
+  borderColor: "#6b7280",
+};
+const nextNumberStyle: ViewStyle = {
+  backgroundColor: "#fbbf24",
+  borderWidth: 2,
+  borderColor: "#f59e0b",
+};
+
 export default function GameScreen() {
   const [snake, setSnake] = useState<Position[]>([{ x: 8, y: 8 }]);
   const [direction, setDirection] = useState<Direction>("RIGHT");
@@ -48,7 +63,7 @@ export default function GameScreen() {
   const [speed, setSpeed] = useState(200);
   const [highScore, setHighScore] = useState(0);
 
-  const gameLoopRef = useRef<NodeJS.Timeout>();
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
   const directionRef = useRef<Direction>("RIGHT");
 
   // refを使って最新の状態を参照
@@ -75,23 +90,6 @@ export default function GameScreen() {
     initializeGame();
   }, []);
 
-  // ゲームループ
-  useEffect(() => {
-    if (gameState === "playing") {
-      gameLoopRef.current = setInterval(moveSnake, speed);
-    } else {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    }
-
-    return () => {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    };
-  }, [gameState, speed, moveSnake]);
-
   const loadHighScore = async () => {
     try {
       const score = await AsyncStorage.getItem("numberSnakeHighScore");
@@ -99,7 +97,7 @@ export default function GameScreen() {
         setHighScore(parseInt(score));
       }
     } catch (error) {
-      console.error("ハイスコア読み込みエラー:", error);
+      console.error("Error loading high score:", error);
     }
   };
 
@@ -110,7 +108,7 @@ export default function GameScreen() {
         setHighScore(newScore);
       }
 
-      // スコア履歴を保存
+      // Save score history
       const historyData = await AsyncStorage.getItem("numberSnakeScoreHistory");
       let history = historyData ? JSON.parse(historyData) : [];
 
@@ -122,7 +120,7 @@ export default function GameScreen() {
 
       history.push(newRecord);
 
-      // 最新の20件のみ保持
+      // Keep only the latest 20 records
       if (history.length > 20) {
         history = history.slice(-20);
       }
@@ -132,7 +130,7 @@ export default function GameScreen() {
         JSON.stringify(history)
       );
     } catch (error) {
-      console.error("スコア保存エラー:", error);
+      console.error("Error saving score:", error);
     }
   };
 
@@ -145,67 +143,6 @@ export default function GameScreen() {
     setScore(0);
     setSpeed(200);
     generateNumbers(initialSnake);
-  };
-
-  const generateNumbers = (currentSnake: Position[]) => {
-    const newNumbers: NumberItem[] = [];
-    const occupiedPositions = new Set(
-      currentSnake.map((pos) => `${pos.x},${pos.y}`)
-    );
-
-    // 最初の数字として必ず1を含める
-    let position: Position;
-    let attempts = 0;
-
-    do {
-      position = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
-      };
-      attempts++;
-    } while (
-      occupiedPositions.has(`${position.x},${position.y}`) &&
-      attempts < 100
-    );
-
-    if (attempts < 100) {
-      newNumbers.push({
-        position,
-        value: 1,
-      });
-    }
-
-    // 残りの2-4個の数字を生成
-    const numCount = Math.floor(Math.random() * 3) + 2;
-
-    for (let i = 0; i < numCount; i++) {
-      let position: Position;
-      let attempts = 0;
-
-      do {
-        position = {
-          x: Math.floor(Math.random() * GRID_SIZE),
-          y: Math.floor(Math.random() * GRID_SIZE),
-        };
-        attempts++;
-      } while (
-        (occupiedPositions.has(`${position.x},${position.y}`) ||
-          newNumbers.some(
-            (num) =>
-              num.position.x === position.x && num.position.y === position.y
-          )) &&
-        attempts < 100
-      );
-
-      if (attempts < 100) {
-        newNumbers.push({
-          position,
-          value: Math.floor(Math.random() * 9) + 1,
-        });
-      }
-    }
-
-    setNumbers(newNumbers);
   };
 
   const moveSnake = useCallback(() => {
@@ -325,6 +262,87 @@ export default function GameScreen() {
     });
   }, [speed]);
 
+  // ゲームループ
+  useEffect(() => {
+    if (gameState === "playing") {
+      gameLoopRef.current = setInterval(
+        moveSnake,
+        speed
+      ) as unknown as NodeJS.Timeout;
+    } else {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current as unknown as number);
+      }
+    }
+
+    return () => {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current as unknown as number);
+      }
+    };
+  }, [gameState, speed, moveSnake]);
+
+  const generateNumbers = (currentSnake: Position[]) => {
+    const newNumbers: NumberItem[] = [];
+    const occupiedPositions = new Set(
+      currentSnake.map((pos) => `${pos.x},${pos.y}`)
+    );
+
+    // 最初の数字として必ず1を含める
+    let position: Position;
+    let attempts = 0;
+
+    do {
+      position = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE),
+      };
+      attempts++;
+    } while (
+      occupiedPositions.has(`${position.x},${position.y}`) &&
+      attempts < 100
+    );
+
+    if (attempts < 100) {
+      newNumbers.push({
+        position,
+        value: 1,
+      });
+    }
+
+    // 残りの2-4個の数字を生成
+    const numCount = Math.floor(Math.random() * 3) + 2;
+
+    for (let i = 0; i < numCount; i++) {
+      let position: Position;
+      let attempts = 0;
+
+      do {
+        position = {
+          x: Math.floor(Math.random() * GRID_SIZE),
+          y: Math.floor(Math.random() * GRID_SIZE),
+        };
+        attempts++;
+      } while (
+        (occupiedPositions.has(`${position.x},${position.y}`) ||
+          newNumbers.some(
+            (num) =>
+              num.position.x === position.x && num.position.y === position.y
+          )) &&
+        attempts < 100
+      );
+
+      if (attempts < 100) {
+        newNumbers.push({
+          position,
+          value: Math.floor(Math.random() * 9) + 1,
+        });
+      }
+    }
+
+    setNumbers(newNumbers);
+  };
+
   const getRandomEmptyPosition = (occupiedPositions: Position[]): Position => {
     const occupied = new Set(
       occupiedPositions.map((pos) => `${pos.x},${pos.y}`)
@@ -349,17 +367,17 @@ export default function GameScreen() {
       saveHighScore(score);
       setTimeout(() => {
         Alert.alert(
-          "ゲームオーバー",
-          `スコア: ${score}\nハイスコア: ${Math.max(score, highScore)}`,
+          "Game Over",
+          `Score: ${score}\nHigh Score: ${Math.max(score, highScore)}`,
           [
             {
-              text: "リトライ",
+              text: "Retry",
               onPress: () => {
                 setGameState("playing");
                 initializeGame();
               },
             },
-            { text: "ホームに戻る", onPress: () => router.replace("/(tabs)/") },
+            { text: "Back to Home", onPress: () => router.replace("/(tabs)") },
           ]
         );
       }, 100);
@@ -416,29 +434,34 @@ export default function GameScreen() {
     let content = null;
 
     if (isSnakeHead) {
-      cellStyle.push(styles.snakeHead);
+      // @ts-ignore
+      cellStyle = [styles.cell, { backgroundColor: "#4ade80" }];
       content = <Text style={styles.snakeHeadText}>🐍</Text>;
     } else if (isSnakeBody) {
-      cellStyle.push(styles.snakeBody);
+      // @ts-ignore
+      cellStyle = [styles.cell, { backgroundColor: "#22c55e" }];
     } else if (numberItem) {
-      cellStyle.push(
-        numberItem.value === nextNumber ? styles.nextNumber : styles.number
-      );
-      content = (
-        <Text
-          style={
-            numberItem.value === nextNumber
-              ? styles.nextNumberText
-              : styles.numberText
-          }
-        >
-          {numberItem.value}
-        </Text>
-      );
+      // @ts-ignore
+      cellStyle = [
+        styles.cell,
+        // @ts-ignore
+        numberItem.value === nextNumber
+          ? {
+              backgroundColor: "#fbbf24",
+              borderWidth: 2,
+              borderColor: "#f59e0b",
+            }
+          : {
+              backgroundColor: "#374151",
+              borderWidth: 1,
+              borderColor: "#6b7280",
+            },
+      ];
+      content = <Text style={styles.numberText}>{numberItem.value}</Text>;
     }
 
     return (
-      <View key={`${x}-${y}`} style={cellStyle}>
+      <View key={`${x}-${y}`} style={cellStyle as StyleProp<ViewStyle>}>
         {content}
       </View>
     );
@@ -464,13 +487,13 @@ export default function GameScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
 
-      {/* ヘッダー */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.replace("/(tabs)/")}
+          onPress={() => router.replace("/(tabs)")}
           style={styles.backButton}
         >
-          <Text style={styles.backButtonText}>← 戻る</Text>
+          <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={togglePause} style={styles.pauseButton}>
@@ -480,23 +503,23 @@ export default function GameScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* スコア表示 */}
+      {/* Score Display */}
       <View style={styles.scoreBoard}>
         <View style={styles.scoreItem}>
-          <Text style={styles.scoreLabel}>スコア</Text>
+          <Text style={styles.scoreLabel}>Score</Text>
           <Text style={styles.scoreValue}>{score}</Text>
         </View>
         <View style={styles.scoreItem}>
-          <Text style={styles.scoreLabel}>次の数字</Text>
+          <Text style={styles.scoreLabel}>Next</Text>
           <Text style={styles.nextNumberDisplay}>{nextNumber}</Text>
         </View>
         <View style={styles.scoreItem}>
-          <Text style={styles.scoreLabel}>ハイスコア</Text>
+          <Text style={styles.scoreLabel}>High Score</Text>
           <Text style={styles.scoreValue}>{highScore}</Text>
         </View>
       </View>
 
-      {/* ゲームグリッド */}
+      {/* Game Grid */}
       <View style={styles.gameContainer} {...panResponder.panHandlers}>
         <View style={styles.grid}>{renderGrid()}</View>
 
@@ -543,12 +566,12 @@ export default function GameScreen() {
         </View>
       </View>
 
-      {/* ポーズオーバーレイ */}
+      {/* Pause Overlay */}
       {gameState === "paused" && (
         <View style={styles.pauseOverlay}>
-          <Text style={styles.pauseText}>ポーズ中</Text>
+          <Text style={styles.pauseText}>Paused</Text>
           <TouchableOpacity onPress={togglePause} style={styles.resumeButton}>
-            <Text style={styles.resumeButtonText}>再開</Text>
+            <Text style={styles.resumeButtonText}>Resume</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -640,33 +663,12 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  snakeHead: {
-    backgroundColor: "#4ade80",
-  },
   snakeHeadText: {
     fontSize: CELL_SIZE * 0.5,
-  },
-  snakeBody: {
-    backgroundColor: "#22c55e",
-  },
-  number: {
-    backgroundColor: "#374151",
-    borderWidth: 1,
-    borderColor: "#6b7280",
-  },
-  nextNumber: {
-    backgroundColor: "#fbbf24",
-    borderWidth: 2,
-    borderColor: "#f59e0b",
   },
   numberText: {
     color: "#e5e7eb",
     fontSize: CELL_SIZE * 0.6,
-    fontWeight: "bold",
-  },
-  nextNumberText: {
-    color: "#1a1a2e",
-    fontSize: CELL_SIZE * 0.7,
     fontWeight: "bold",
   },
   pauseOverlay: {
